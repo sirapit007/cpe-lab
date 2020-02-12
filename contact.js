@@ -6,12 +6,17 @@ let firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore();
+let all = 0;
+let cmale = 0, cfemale = 0, cother = 0;
+let pmale = 0.00, pfemale = 0.00, pother = 0.00; 
 
 $('button').click(() => {
+
     if (validate()) {
         db.collection("USers").add({
             firstname: $('#firstname').val(),
             lastname: $('#lastname').val(),
+            gender: $('#gender').val(),
             email: $('#email').val(),
             massage: $('#massage').val(),         
         })
@@ -19,7 +24,8 @@ $('button').click(() => {
             console.log("Document written with ID: ", docRef.id);
             $('#firstname').val('')
             $('#lastname').val('')
-            $('#email').val('')
+            $('#gender').val(-1);
+            $('#email').val('');
             $('#massage').val('')
         })
         .catch(function (error) {
@@ -38,16 +44,36 @@ db.collection("USers").onSnapshot(doc=>{
         let secondcell =row.insertCell(1)
         let thirdcell =row.insertCell(2)
         let fourthcell = row.insertCell(3)
+        let fifthcell = row.insertCell(4)
         firstcell.textContent=item.data().firstname
         secondcell.textContent=item.data().lastname
-        thirdcell.textContent=item.data().email
-        fourthcell.textContent=item.data().massage
+        thirdcell.textContent=item.data().gender
+        fourthcell.textContent=item.data().email
+        fifthcell.textContent=item.data().massage
+        if (item.data().gender === 'male') {
+            all++;
+            cmale++;
+        } else if (item.data().gender === 'female') {
+            all++;
+            cfemale++;
+        } else {
+            all++;
+            cother++;
+        }
     })
+
+    pmale = (100/all)*cmale;
+    pfemale = (100/all)*cfemale;
+    pother = (100/all)*cother;
+    $('b1').text(pmale + " %")
+    $('b2').text(pfemale + " %")
+    $('b3').text(pother + " %")
 })
 
 function validate() {
     let fname = document.myForm.firstname.value;
     let lname = document.myForm.lastname.value;
+    let gen = document.myForm.gender.value;
     let email = document.myForm.email.value;
     let msg = document.myForm.massage.value;
 
@@ -60,6 +86,12 @@ function validate() {
     if (lname === '') {
         alert('Please input your LastName !');
         document.myForm.lastname.focus();
+        return false;
+    }
+
+    if (gen === 'none') {
+        alert('Please input your Country !');   
+        document.myForm.gender.focus();
         return false;
     }
 
